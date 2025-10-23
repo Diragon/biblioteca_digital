@@ -1,0 +1,751 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Biblioteca Digital API",
+    "description": "API RESTful para sistema de biblioteca digital com autenticação JWT",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Suporte API",
+      "email": "suporte@bibliotecadigital.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de desenvolvimento"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/autenticacao/login": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Fazer login",
+        "description": "Autentica um usuário e retorna um token JWT",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "usuario@exemplo.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "senha123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "mensagem": { "type": "string" },
+                    "dados": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string" },
+                        "usuario": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "integer" },
+                            "email": { "type": "string" },
+                            "criado_em": { "type": "string", "format": "date-time" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas"
+          }
+        }
+      }
+    },
+    "/autenticacao/registrar": {
+      "post": {
+        "tags": ["Autenticação"],
+        "summary": "Registrar novo usuário",
+        "description": "Cria um novo usuário e retorna um token JWT",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "novo@exemplo.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "senha123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário registrado com sucesso"
+          },
+          "422": {
+            "description": "Erro de validação"
+          }
+        }
+      }
+    },
+    "/autenticacao/perfil": {
+      "get": {
+        "tags": ["Autenticação"],
+        "summary": "Obter perfil do usuário",
+        "description": "Retorna informações do usuário autenticado",
+        "responses": {
+          "200": {
+            "description": "Perfil do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "dados": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "email": { "type": "string" },
+                        "criado_em": { "type": "string", "format": "date-time" },
+                        "total_materiais": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/autores": {
+      "get": {
+        "tags": ["Autores"],
+        "summary": "Listar autores",
+        "description": "Retorna lista de autores com paginação e filtros",
+        "security": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da página",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Itens por página",
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "description": "Filtro por tipo de autor",
+            "schema": { "type": "string", "enum": ["Pessoa", "Instituicao"] }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Busca por nome",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de autores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "dados": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Autor"
+                      }
+                    },
+                    "paginacao": {
+                      "$ref": "#/components/schemas/Paginacao"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Autores"],
+        "summary": "Criar novo autor",
+        "description": "Cria um novo autor (pessoa ou instituição)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutorInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Autor criado com sucesso"
+          },
+          "422": {
+            "description": "Erro de validação"
+          }
+        }
+      }
+    },
+    "/autores/{id}": {
+      "get": {
+        "tags": ["Autores"],
+        "summary": "Obter autor específico",
+        "description": "Retorna detalhes de um autor específico",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do autor",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do autor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "dados": {
+                      "$ref": "#/components/schemas/AutorDetalhado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Autor não encontrado"
+          }
+        }
+      }
+    },
+    "/materials": {
+      "get": {
+        "tags": ["Materiais"],
+        "summary": "Listar materiais",
+        "description": "Retorna lista de materiais com filtros e paginação",
+        "security": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da página",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Itens por página",
+            "schema": { "type": "integer", "default": 10 }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "description": "Filtro por tipo de material",
+            "schema": { "type": "string", "enum": ["Livro", "Artigo", "Video"] }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtro por status",
+            "schema": { "type": "string", "enum": ["rascunho", "publicado", "arquivado"] }
+          },
+          {
+            "name": "autor_id",
+            "in": "query",
+            "description": "Filtro por autor",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "description": "Busca por título ou descrição",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de materiais",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "dados": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Material"
+                      }
+                    },
+                    "paginacao": {
+                      "$ref": "#/components/schemas/Paginacao"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Materiais"],
+        "summary": "Criar novo material",
+        "description": "Cria um novo material (livro, artigo ou vídeo)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Material criado com sucesso"
+          },
+          "422": {
+            "description": "Erro de validação"
+          }
+        }
+      }
+    },
+    "/materials/{id}": {
+      "get": {
+        "tags": ["Materiais"],
+        "summary": "Obter material específico",
+        "description": "Retorna detalhes de um material específico",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do material",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do material",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "dados": {
+                      "$ref": "#/components/schemas/MaterialDetalhado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Material não encontrado"
+          }
+        }
+      }
+    },
+    "/buscar": {
+      "get": {
+        "tags": ["Busca"],
+        "summary": "Buscar materiais",
+        "description": "Busca materiais por termo com filtros",
+        "security": [],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Termo de busca",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "description": "Filtro por tipo",
+            "schema": { "type": "string", "enum": ["Livro", "Artigo", "Video"] }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtro por status",
+            "schema": { "type": "string", "enum": ["rascunho", "publicado", "arquivado"] }
+          },
+          {
+            "name": "autor_id",
+            "in": "query",
+            "description": "Filtro por autor",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número da página",
+            "schema": { "type": "integer", "default": 1 }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Itens por página",
+            "schema": { "type": "integer", "default": 10 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados da busca",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "termo_busca": { "type": "string" },
+                    "dados": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Material"
+                      }
+                    },
+                    "paginacao": {
+                      "$ref": "#/components/schemas/Paginacao"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/estatisticas": {
+      "get": {
+        "tags": ["Estatísticas"],
+        "summary": "Obter estatísticas",
+        "description": "Retorna estatísticas gerais da biblioteca",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Estatísticas da biblioteca",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sucesso": { "type": "boolean" },
+                    "dados": {
+                      "type": "object",
+                      "properties": {
+                        "total_materiais": { "type": "integer" },
+                        "por_tipo": {
+                          "type": "object",
+                          "properties": {
+                            "livros": { "type": "integer" },
+                            "artigos": { "type": "integer" },
+                            "videos": { "type": "integer" }
+                          }
+                        },
+                        "por_status": {
+                          "type": "object",
+                          "properties": {
+                            "rascunho": { "type": "integer" },
+                            "publicado": { "type": "integer" },
+                            "arquivado": { "type": "integer" }
+                          }
+                        },
+                        "total_autores": { "type": "integer" },
+                        "total_usuarios": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/graphql": {
+      "post": {
+        "tags": ["GraphQL"],
+        "summary": "Endpoint GraphQL",
+        "description": "Endpoint para consultas GraphQL",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Query GraphQL",
+                    "example": "{ materials { id titulo tipo autor { nome } } }"
+                  },
+                  "variables": {
+                    "type": "object",
+                    "description": "Variáveis da query"
+                  },
+                  "operationName": {
+                    "type": "string",
+                    "description": "Nome da operação"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resposta GraphQL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "object" },
+                    "errors": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Autor": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nome": { "type": "string" },
+          "tipo": { "type": "string", "enum": ["Pessoa", "Instituicao"] },
+          "nome_completo": { "type": "string" },
+          "data_nascimento": { "type": "string", "format": "date" },
+          "cidade": { "type": "string" },
+          "idade": { "type": "integer" },
+          "total_materiais": { "type": "integer" },
+          "criado_em": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AutorDetalhado": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Autor" },
+          {
+            "type": "object",
+            "properties": {
+              "atualizado_em": { "type": "string", "format": "date-time" },
+              "materiais": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "titulo": { "type": "string" },
+                    "tipo": { "type": "string" },
+                    "status": { "type": "string" },
+                    "criado_por": { "type": "string" },
+                    "criado_em": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AutorInput": {
+        "type": "object",
+        "required": ["nome", "tipo"],
+        "properties": {
+          "nome": { "type": "string", "minLength": 3, "maxLength": 120 },
+          "tipo": { "type": "string", "enum": ["Pessoa", "Instituicao"] },
+          "data_nascimento": { "type": "string", "format": "date" },
+          "cidade": { "type": "string", "minLength": 2, "maxLength": 80 }
+        }
+      },
+      "Material": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "titulo": { "type": "string" },
+          "descricao": { "type": "string" },
+          "tipo": { "type": "string", "enum": ["Livro", "Artigo", "Video"] },
+          "status": { "type": "string", "enum": ["rascunho", "publicado", "arquivado"] },
+          "autor": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "nome": { "type": "string" },
+              "tipo": { "type": "string" }
+            }
+          },
+          "criado_por": { "type": "string" },
+          "criado_em": { "type": "string", "format": "date-time" },
+          "atualizado_em": { "type": "string", "format": "date-time" },
+          "informacoes_especificas": { "type": "object" }
+        }
+      },
+      "MaterialDetalhado": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Material" },
+          {
+            "type": "object",
+            "properties": {
+              "autor": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer" },
+                  "nome": { "type": "string" },
+                  "tipo": { "type": "string" },
+                  "nome_completo": { "type": "string" }
+                }
+              },
+              "criado_por": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer" },
+                  "email": { "type": "string" }
+                }
+              },
+              "pode_editar": { "type": "boolean" },
+              "pode_excluir": { "type": "boolean" }
+            }
+          }
+        ]
+      },
+      "MaterialInput": {
+        "type": "object",
+        "required": ["tipo", "titulo", "autor_id"],
+        "properties": {
+          "tipo": { "type": "string", "enum": ["Livro", "Artigo", "Video"] },
+          "titulo": { "type": "string", "minLength": 3, "maxLength": 100 },
+          "descricao": { "type": "string", "maxLength": 1000 },
+          "status": { "type": "string", "enum": ["rascunho", "publicado", "arquivado"] },
+          "autor_id": { "type": "integer" },
+          "isbn": { "type": "string", "pattern": "^\\d{13}$" },
+          "numero_paginas": { "type": "integer", "minimum": 1 },
+          "doi": { "type": "string", "pattern": "^10\\.\\d{4,}\\/[^\\s]+$" },
+          "duracao_minutos": { "type": "integer", "minimum": 1 }
+        }
+      },
+      "Paginacao": {
+        "type": "object",
+        "properties": {
+          "pagina_atual": { "type": "integer" },
+          "por_pagina": { "type": "integer" },
+          "total_registros": { "type": "integer" },
+          "total_paginas": { "type": "integer" }
+        }
+      },
+      "Erro": {
+        "type": "object",
+        "properties": {
+          "sucesso": { "type": "boolean", "example": false },
+          "erro": { "type": "string" },
+          "codigo": { "type": "string" },
+          "detalhes": { "type": "string" },
+          "erros": { "type": "object" }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Autenticação",
+      "description": "Endpoints para autenticação e gerenciamento de usuários"
+    },
+    {
+      "name": "Autores",
+      "description": "Endpoints para gerenciamento de autores (pessoas e instituições)"
+    },
+    {
+      "name": "Materiais",
+      "description": "Endpoints para gerenciamento de materiais (livros, artigos, vídeos)"
+    },
+    {
+      "name": "Busca",
+      "description": "Endpoints para busca de materiais"
+    },
+    {
+      "name": "Estatísticas",
+      "description": "Endpoints para estatísticas da biblioteca"
+    },
+    {
+      "name": "GraphQL",
+      "description": "Endpoint GraphQL para consultas flexíveis"
+    }
+  ]
+}
