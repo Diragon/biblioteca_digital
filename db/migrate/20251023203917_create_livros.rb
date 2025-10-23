@@ -10,7 +10,7 @@ class CreateLivros < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     # Índice único para ISBN para garantir unicidade
     add_index :livros, :isbn, unique: true
   end

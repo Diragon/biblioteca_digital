@@ -10,11 +10,10 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
           password: "123456"
         }
         }.to change(Usuario, :count).by(1)
-        
+
         expectar_resposta_criacao
         expect(JSON.parse(response.body)['dados']['usuario']['email']).to eq('novo@example.com')
       end
-
     end
 
     context "com parâmetros inválidos" do
@@ -23,7 +22,7 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
           email: "email_invalido",
           password: "123456"
         }
-        
+
         expectar_resposta_erro
         expect(JSON.parse(response.body)['detalhes']).to include('Email deve ter um formato válido')
       end
@@ -33,19 +32,19 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
           email: "teste@example.com",
           password: "123"
         }
-        
+
         expectar_resposta_erro
         expect(JSON.parse(response.body)['detalhes']).to include('Password deve ter pelo menos 6 caracteres')
       end
 
       it "não cria usuário com email duplicado" do
         create(:usuario, email: "teste@example.com")
-        
+
         post "/autenticacao/registrar", params: {
           email: "teste@example.com",
           password: "123456"
         }
-        
+
         expectar_resposta_erro
         expect(JSON.parse(response.body)['detalhes']).to include('Email já está em uso')
       end
@@ -57,12 +56,12 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
       it "faz login com sucesso" do
         # Cria o usuário explicitamente
         usuario = create(:usuario, email: "teste@example.com", password: "123456")
-        
+
         post "/autenticacao/login", params: {
           email: "teste@example.com",
           password: "123456"
         }
-        
+
         expectar_resposta_sucesso
         expect(JSON.parse(response.body)['dados']['token']).to be_present
         expect(JSON.parse(response.body)['dados']['usuario']['email']).to eq('teste@example.com')
@@ -75,7 +74,7 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
           email: "email_errado@example.com",
           password: "123456"
         }
-        
+
         expectar_resposta_nao_autorizado
       end
 
@@ -84,7 +83,7 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
           email: "teste@example.com",
           password: "senha_errada"
         }
-        
+
         expectar_resposta_nao_autorizado
       end
     end
@@ -96,7 +95,7 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
 
     it "retorna dados do usuário autenticado" do
       get_autenticado "/autenticacao/perfil", token
-      
+
       expectar_resposta_sucesso
       expect(JSON.parse(response.body)['dados']['id']).to eq(usuario.id)
       expect(JSON.parse(response.body)['dados']['email']).to eq(usuario.email)
@@ -104,7 +103,7 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
 
     it "não retorna perfil sem autenticação" do
       get "/autenticacao/perfil"
-      
+
       expectar_resposta_nao_autorizado
     end
   end
@@ -115,11 +114,11 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
         # Cria o usuário explicitamente
         usuario = create(:usuario, email: "teste@example.com")
         token = usuario.gerar_token_jwt
-        
+
         put_autenticado "/autenticacao/perfil", token, params: {
           email: "novo@example.com"
         }
-        
+
         expectar_resposta_sucesso
         expect(JSON.parse(response.body)['dados']['email']).to eq('novo@example.com')
       end
@@ -130,11 +129,11 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
         # Cria o usuário explicitamente
         usuario = create(:usuario, email: "teste@example.com")
         token = usuario.gerar_token_jwt
-        
+
         put_autenticado "/autenticacao/perfil", token, params: {
           email: "email_invalido"
         }
-        
+
         expectar_resposta_erro
       end
     end
@@ -146,14 +145,14 @@ RSpec.describe "Autenticacao::Autenticacao", type: :request do
 
     it "valida token válido" do
       get_autenticado "/autenticacao/validar_token", token
-      
+
       expectar_resposta_sucesso
       expect(JSON.parse(response.body)['dados']['valido']).to be true
     end
 
     it "não valida token inválido" do
       get "/autenticacao/validar_token", headers: { 'Authorization' => 'Bearer token_invalido' }
-      
+
       expectar_resposta_nao_autorizado
     end
   end

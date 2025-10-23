@@ -7,7 +7,7 @@ module Types
     field :numero_paginas, Integer, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # Relacionamento com material
     field :material, Types::MaterialType, null: false
 

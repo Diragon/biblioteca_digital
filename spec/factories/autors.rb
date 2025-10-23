@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :autor do
     # Gera nome único para cada autor
     sequence(:nome) { |n| "Autor #{n}" }
-    
+
     # Trait para autor pessoa
     trait :pessoa do
       tipo { "Pessoa" }

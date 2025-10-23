@@ -71,7 +71,7 @@ RSpec.describe Video, type: :model do
     it "filtra por duração" do
       video_curto = create(:video, duracao_minutos: 5, material: material)
       video_longo = create(:video, duracao_minutos: 120, material: material)
-      
+
       videos_curtos = Video.por_duracao(max_minutos: 10)
       expect(videos_curtos).to include(video_curto)
       expect(videos_curtos).not_to include(video_longo)
@@ -81,7 +81,7 @@ RSpec.describe Video, type: :model do
       video_curto = create(:video, duracao_minutos: 5, material: material)
       video_medio = create(:video, duracao_minutos: 30, material: material)
       video_longo = create(:video, duracao_minutos: 120, material: material)
-      
+
       expect(Video.por_categoria_duracao("curto")).to include(video_curto)
       expect(Video.por_categoria_duracao("medio")).to include(video_medio)
       expect(Video.por_categoria_duracao("longo")).to include(video_longo)
@@ -90,7 +90,7 @@ RSpec.describe Video, type: :model do
     it "retorna estatísticas de duração" do
       create(:video, duracao_minutos: 10, material: material)
       create(:video, duracao_minutos: 20, material: material)
-      
+
       estatisticas = Video.estatisticas_duracao
       expect(estatisticas[:total_videos]).to eq(2)
       expect(estatisticas[:duracao_media]).to eq(15.0)

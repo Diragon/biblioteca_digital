@@ -16,7 +16,7 @@ class CreateMaterials < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     # Índices para otimizar consultas
     add_index :materials, :tipo
     add_index :materials, :status

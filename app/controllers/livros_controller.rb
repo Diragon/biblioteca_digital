@@ -3,7 +3,7 @@ class LivrosController < ApplicationController
   include AutenticacaoJwt
 
   # Desabilita autenticação para listagem e visualização (apenas para operações de escrita)
-  skip_before_action :autenticar_usuario!, only: [:index, :show, :buscar_por_isbn]
+  skip_before_action :autenticar_usuario!, only: [ :index, :show, :buscar_por_isbn ]
 
   # GET /livros
   # Lista todos os livros com paginação
@@ -11,33 +11,33 @@ class LivrosController < ApplicationController
     # Parâmetros de paginação
     page = params[:page] || 1
     per_page = params[:per_page] || 10
-    
+
     # Filtros opcionais
     status = params[:status]
     autor_id = params[:autor_id]
     termo_busca = params[:q]
-    
+
     # Busca livros
     livros = Livro.joins(:material)
-                  .includes(material: [:autor, :usuario])
-    
+                  .includes(material: [ :autor, :usuario ])
+
     # Aplica filtros
     livros = livros.where(materials: { status: status }) if status.present?
     livros = livros.where(materials: { autor_id: autor_id }) if autor_id.present?
-    
+
     if termo_busca.present?
       livros = livros.where(
         "materials.titulo ILIKE ? OR materials.descricao ILIKE ?",
         "%#{termo_busca}%", "%#{termo_busca}%"
       )
     end
-    
+
     # Ordena por data de criação
-    livros = livros.order('materials.created_at DESC')
-    
+    livros = livros.order("materials.created_at DESC")
+
     # Aplica paginação
     livros_paginados = aplicar_paginacao(livros, page: page, per_page: per_page)
-    
+
     # Serializa os dados
     dados_livros = livros_paginados.map do |livro|
       {
@@ -60,7 +60,7 @@ class LivrosController < ApplicationController
         }
       }
     end
-    
+
     # Retorna resposta com paginação
     render json: {
       sucesso: true,
@@ -74,7 +74,7 @@ class LivrosController < ApplicationController
   def show
     # Busca o livro pelo ID
     livro = Livro.find(params[:id])
-    
+
     # Serializa os dados do livro
     dados_livro = {
       id: livro.id,
@@ -102,7 +102,7 @@ class LivrosController < ApplicationController
         pode_excluir: usuario_autenticado? ? livro.material.pode_ser_excluido_por?(usuario_atual) : false
       }
     }
-    
+
     render_sucesso(dados_livro)
   end
 
@@ -110,19 +110,19 @@ class LivrosController < ApplicationController
   # Cria um novo livro
   def create
     # Valida parâmetros obrigatórios
-    campos_obrigatorios = [:titulo, :autor_id, :isbn, :numero_paginas]
+    campos_obrigatorios = [ :titulo, :autor_id, :isbn, :numero_paginas ]
     unless validar_parametros_obrigatorios(livro_params, campos_obrigatorios)
       return
     end
 
     # Cria o livro usando o serviço
     resultado = MaterialService.criar_livro_com_isbn(usuario_atual, livro_params)
-    
+
     if resultado.persisted?
       # Serializa os dados do livro criado
       dados_livro = serializar_livro(resultado)
-      
-      render_sucesso_criacao(dados_livro, 'Livro criado com sucesso')
+
+      render_sucesso_criacao(dados_livro, "Livro criado com sucesso")
     else
       render_erro_validacao(resultado)
     end
@@ -133,15 +133,15 @@ class LivrosController < ApplicationController
   def update
     # Busca o livro pelo ID
     livro = Livro.find(params[:id])
-    
+
     # Atualiza o livro usando o serviço
     resultado = MaterialService.atualizar_material(livro.material, usuario_atual, livro_params)
-    
+
     if resultado.persisted?
       # Serializa os dados do livro atualizado
       dados_livro = serializar_livro(resultado)
-      
-      render_sucesso_atualizacao(dados_livro, 'Livro atualizado com sucesso')
+
+      render_sucesso_atualizacao(dados_livro, "Livro atualizado com sucesso")
     else
       render_erro_validacao(resultado)
     end
@@ -152,16 +152,16 @@ class LivrosController < ApplicationController
   def destroy
     # Busca o livro pelo ID
     livro = Livro.find(params[:id])
-    
+
     # Exclui o livro usando o serviço
     resultado = MaterialService.excluir_material(livro.material, usuario_atual)
-    
+
     if resultado.sucesso
-      render_sucesso_exclusao('Livro excluído com sucesso')
+      render_sucesso_exclusao("Livro excluído com sucesso")
     else
       render json: {
         erro: resultado.erro,
-        codigo: 'ERRO_EXCLUSAO'
+        codigo: "ERRO_EXCLUSAO"
       }, status: :unprocessable_entity
     end
   end
@@ -171,34 +171,34 @@ class LivrosController < ApplicationController
   def buscar_por_isbn
     # Obtém o ISBN dos parâmetros
     isbn = params[:isbn]
-    
+
     # Valida se o ISBN foi fornecido
     unless isbn.present?
       render json: {
-        erro: 'ISBN é obrigatório',
-        codigo: 'ERRO_ISBN_OBRIGATORIO'
+        erro: "ISBN é obrigatório",
+        codigo: "ERRO_ISBN_OBRIGATORIO"
       }, status: :bad_request
       return
     end
-    
+
     # Valida formato do ISBN
     unless Livro.isbn_valido?(isbn)
       render json: {
-        erro: 'ISBN deve ter exatamente 13 dígitos numéricos',
-        codigo: 'ERRO_ISBN_INVALIDO'
+        erro: "ISBN deve ter exatamente 13 dígitos numéricos",
+        codigo: "ERRO_ISBN_INVALIDO"
       }, status: :bad_request
       return
     end
-    
+
     # Busca dados na API OpenLibrary
     dados_api = OpenLibraryService.buscar_livro_por_isbn(isbn)
-    
+
     if dados_api[:sucesso]
       render_sucesso(dados_api)
     else
       render json: {
         erro: dados_api[:erro],
-        codigo: 'ERRO_API_OPENLIBRARY'
+        codigo: "ERRO_API_OPENLIBRARY"
       }, status: :unprocessable_entity
     end
   end

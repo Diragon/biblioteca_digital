@@ -12,7 +12,7 @@ RSpec.describe Usuario, type: :model do
     it 'valida unicidade do email' do
       create(:usuario, email: 'teste@example.com')
       usuario_duplicado = build(:usuario, email: 'teste@example.com')
-      
+
       expect(usuario_duplicado).not_to be_valid
       expect(usuario_duplicado.errors[:email]).to include('já está em uso')
     end
@@ -42,7 +42,7 @@ RSpec.describe Usuario, type: :model do
       it 'autentica usuário com credenciais corretas' do
         # Garante que o usuário foi salvo
         expect(usuario).to be_persisted
-        
+
         resultado = Usuario.autenticar('teste@example.com', '123456')
         expect(resultado).to eq(usuario)
       end

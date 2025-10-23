@@ -8,20 +8,20 @@ class Usuario < ApplicationRecord
 
   # Validações
   # Email é obrigatório, deve ser único e ter formato válido
-  validates :email, 
-            presence: { message: 'não pode estar em branco' },
-            uniqueness: { message: 'já está em uso' },
-            format: { 
-              with: URI::MailTo::EMAIL_REGEXP, 
-              message: 'deve ter um formato válido' 
+  validates :email,
+            presence: { message: "não pode estar em branco" },
+            uniqueness: { message: "já está em uso" },
+            format: {
+              with: URI::MailTo::EMAIL_REGEXP,
+              message: "deve ter um formato válido"
             }
 
   # Senha é obrigatória e deve ter no mínimo 6 caracteres (apenas na criação)
-  validates :password, 
-            presence: { message: 'não pode estar em branco' },
-            length: { 
-              minimum: 6, 
-              message: 'deve ter pelo menos 6 caracteres' 
+  validates :password,
+            presence: { message: "não pode estar em branco" },
+            length: {
+              minimum: 6,
+              message: "deve ter pelo menos 6 caracteres"
             },
             if: :password_required?
 
@@ -30,11 +30,11 @@ class Usuario < ApplicationRecord
   # Gera um token JWT para autenticação
   def gerar_token_jwt
     # Payload do token contendo o ID do usuário
-    payload = { 
-      usuario_id: id, 
-      exp: 24.hours.from_now.to_i 
+    payload = {
+      usuario_id: id,
+      exp: 24.hours.from_now.to_i
     }
-    
+
     # Gera o token usando a chave secreta da aplicação
     JWT.encode(payload, Rails.application.secret_key_base)
   end
@@ -43,7 +43,7 @@ class Usuario < ApplicationRecord
   def self.autenticar(email, password)
     # Busca o usuário pelo email
     usuario = find_by(email: email.downcase.strip)
-    
+
     # Verifica se o usuário existe e se a senha está correta
     if usuario&.authenticate(password)
       usuario
@@ -57,9 +57,9 @@ class Usuario < ApplicationRecord
     begin
       # Decodifica o token JWT
       payload = JWT.decode(token, Rails.application.secret_key_base)[0]
-      
+
       # Busca o usuário pelo ID do payload
-      find(payload['usuario_id'])
+      find(payload["usuario_id"])
     rescue JWT::DecodeError, ActiveRecord::RecordNotFound
       # Retorna nil se o token for inválido ou usuário não encontrado
       nil

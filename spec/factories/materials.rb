@@ -2,16 +2,16 @@ FactoryBot.define do
   factory :material do
     # Gera título único para cada material
     sequence(:titulo) { |n| "Material #{n}" }
-    
+
     # Descrição padrão
     descricao { "Descrição do material" }
-    
+
     # Tipo padrão
     tipo { "Livro" }
-    
+
     # Status padrão
     status { "rascunho" }
-    
+
     # Associações
     association :usuario
     association :autor

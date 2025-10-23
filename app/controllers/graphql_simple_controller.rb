@@ -2,24 +2,24 @@
 
 class GraphqlSimpleController < ActionController::API
   # Controller simples para GraphQL sem verificação de migrações
-  
+
   def execute
     variables = prepare_variables(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]
-    
+
     # Contexto simples
     context = {
       current_user: nil,
       request: request
     }
-    
+
     result = BibliotecaDigitalSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue StandardError => e
-    render json: { 
-      errors: [{ message: e.message, backtrace: e.backtrace }], 
-      data: {} 
+    render json: {
+      errors: [ { message: e.message, backtrace: e.backtrace } ],
+      data: {}
     }, status: 500
   end
 

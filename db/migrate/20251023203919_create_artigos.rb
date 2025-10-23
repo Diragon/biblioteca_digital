@@ -8,7 +8,7 @@ class CreateArtigos < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     # Índice único para DOI para garantir unicidade
     add_index :artigos, :doi, unique: true
   end

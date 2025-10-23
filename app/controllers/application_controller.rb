@@ -34,17 +34,17 @@ class ApplicationController < ActionController::API
     # Log do erro para debug
     Rails.logger.error "Erro genérico: #{erro.message}"
     Rails.logger.error erro.backtrace.join("\n")
-    
+
     # Retorna erro genérico para o cliente
     render json: {
-      erro: 'Erro interno do servidor',
-      codigo: 'ERRO_INTERNO'
+      erro: "Erro interno do servidor",
+      codigo: "ERRO_INTERNO"
     }, status: :internal_server_error
   end
 
   # Trata registro não encontrado
   def tratar_nao_encontrado(erro)
-    render_erro_nao_encontrado('Recurso não encontrado')
+    render_erro_nao_encontrado("Recurso não encontrado")
   end
 
   # Trata erro de validação

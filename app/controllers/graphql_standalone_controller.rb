@@ -2,7 +2,7 @@
 
 class GraphqlStandaloneController < ActionController::API
   # Controller completamente independente para GraphQL
-  
+
   def execute
     # Resposta simples sem usar o banco de dados
     render json: {
@@ -11,9 +11,9 @@ class GraphqlStandaloneController < ActionController::API
       }
     }
   rescue StandardError => e
-    render json: { 
-      errors: [{ message: e.message }], 
-      data: {} 
+    render json: {
+      errors: [ { message: e.message } ],
+      data: {}
     }, status: 500
   end
 end

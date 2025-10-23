@@ -3,7 +3,7 @@ module RequestHelpers
   def autenticar_usuario(usuario)
     # Gera token JWT para o usuário
     token = usuario.gerar_token_jwt
-    
+
     # Adiciona o token no header Authorization
     request.headers['Authorization'] = "Bearer #{token}"
   end
@@ -11,7 +11,7 @@ module RequestHelpers
   # Helper para fazer login e retornar token
   def fazer_login(email, senha)
     post '/autenticacao/login', params: { email: email, senha: senha }
-    
+
     if response.status == 200
       JSON.parse(response.body)['dados']['token']
     else
@@ -23,10 +23,10 @@ module RequestHelpers
   def criar_usuario_e_fazer_login(email = 'teste@example.com', senha = '123456')
     # Cria usuário
     usuario = Usuario.create!(email: email, senha: senha)
-    
+
     # Faz login e retorna token
     token = fazer_login(email, senha)
-    
+
     { usuario: usuario, token: token }
   end
 

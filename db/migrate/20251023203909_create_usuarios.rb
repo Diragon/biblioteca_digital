@@ -8,7 +8,7 @@ class CreateUsuarios < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     # Índice único para email para garantir unicidade
     add_index :usuarios, :email, unique: true
   end

@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :usuario do
     # Gera email único para cada usuário
     sequence(:email) { |n| "usuario#{n}@example.com" }
-    
+
     # Senha padrão para testes
     password { "123456" }
     password_confirmation { "123456" }

@@ -12,7 +12,7 @@ class CreateAutors < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     # Índice para tipo para otimizar consultas
     add_index :autors, :tipo
   end

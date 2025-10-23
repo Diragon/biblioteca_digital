@@ -1,4 +1,4 @@
-require 'ostruct'
+require "ostruct"
 
 class MaterialService
   # Método de classe para criar um material com seus dados específicos
@@ -7,12 +7,12 @@ class MaterialService
     ActiveRecord::Base.transaction do
       # Cria o material base
       material = criar_material_base(usuario, parametros)
-      
+
       # Se o material foi criado com sucesso, cria o tipo específico
       if material.persisted?
         criar_tipo_especifico(material, parametros)
       end
-      
+
       # Retorna o material com os dados específicos carregados
       material.reload
     end
@@ -20,7 +20,7 @@ class MaterialService
     # Em caso de erro, retorna um objeto com erro
     OpenStruct.new(
       persisted?: false,
-      errors: { base: [e.message] }
+      errors: { base: [ e.message ] }
     )
   end
 
@@ -31,15 +31,15 @@ class MaterialService
       # Se ISBN foi fornecido, busca dados na API OpenLibrary
       if parametros[:isbn].present?
         dados_api = buscar_dados_livro_isbn(parametros[:isbn])
-        
+
         # Se encontrou dados na API, preenche campos não fornecidos
         if dados_api[:sucesso]
           preencher_dados_api(parametros, dados_api)
         end
       end
-      
+
       # Cria o material e o livro
-      criar_material(usuario, parametros.merge(tipo: 'Livro'))
+      criar_material(usuario, parametros.merge(tipo: "Livro"))
     end
   end
 
@@ -49,7 +49,7 @@ class MaterialService
     unless material.pode_ser_editado_por?(usuario)
       return OpenStruct.new(
         persisted?: false,
-        errors: { base: ['Você não tem permissão para editar este material'] }
+        errors: { base: [ "Você não tem permissão para editar este material" ] }
       )
     end
 
@@ -57,10 +57,10 @@ class MaterialService
     ActiveRecord::Base.transaction do
       # Atualiza o material base
       material.update!(parametros.except(:isbn, :doi, :duracao_minutos, :numero_paginas))
-      
+
       # Atualiza o tipo específico se necessário
       atualizar_tipo_especifico(material, parametros)
-      
+
       # Retorna o material atualizado
       material.reload
     end
@@ -68,7 +68,7 @@ class MaterialService
     # Em caso de erro, retorna um objeto com erro
     OpenStruct.new(
       persisted?: false,
-      errors: { base: [e.message] }
+      errors: { base: [ e.message ] }
     )
   end
 
@@ -78,13 +78,13 @@ class MaterialService
     unless material.pode_ser_excluido_por?(usuario)
       return OpenStruct.new(
         sucesso: false,
-        erro: 'Você não tem permissão para excluir este material'
+        erro: "Você não tem permissão para excluir este material"
       )
     end
 
     # Exclui o material (cascade excluirá o tipo específico)
     material.destroy!
-    
+
     OpenStruct.new(sucesso: true)
   rescue StandardError => e
     # Em caso de erro, retorna um objeto com erro
@@ -102,10 +102,10 @@ class MaterialService
     parametros_material = parametros.slice(
       :tipo, :titulo, :descricao, :status, :autor_id
     )
-    
+
     # Adiciona o usuário criador
     parametros_material[:usuario] = usuario
-    
+
     # Cria o material
     Material.create!(parametros_material)
   end
@@ -113,11 +113,11 @@ class MaterialService
   # Cria o tipo específico do material
   def self.criar_tipo_especifico(material, parametros)
     case material.tipo
-    when 'Livro'
+    when "Livro"
       criar_livro(material, parametros)
-    when 'Artigo'
+    when "Artigo"
       criar_artigo(material, parametros)
-    when 'Video'
+    when "Video"
       criar_video(material, parametros)
     end
   end
@@ -156,13 +156,13 @@ class MaterialService
   def self.preencher_dados_api(parametros, dados_api)
     # Preenche título se não foi fornecido
     parametros[:titulo] ||= dados_api[:titulo]
-    
+
     # Preenche número de páginas se não foi fornecido
     parametros[:numero_paginas] ||= dados_api[:numero_paginas]
-    
+
     # Preenche descrição se não foi fornecida
     parametros[:descricao] ||= dados_api[:descricao]
-    
+
     # Se não foi fornecido autor e encontrou autores na API, cria o primeiro autor
     if parametros[:autor_id].blank? && dados_api[:autores].present?
       autor = criar_autor_automatico(dados_api[:autores].first)
@@ -173,15 +173,15 @@ class MaterialService
   # Cria um autor automaticamente baseado no nome da API
   def self.criar_autor_automatico(nome_autor)
     # Busca se já existe um autor com esse nome
-    autor_existente = Autor.find_by(nome: nome_autor, tipo: 'Pessoa')
-    
+    autor_existente = Autor.find_by(nome: nome_autor, tipo: "Pessoa")
+
     if autor_existente
       autor_existente
     else
       # Cria um novo autor como pessoa
       Autor.create!(
         nome: nome_autor,
-        tipo: 'Pessoa',
+        tipo: "Pessoa",
         data_nascimento: Date.new(1900, 1, 1) # Data padrão
       )
     end
@@ -193,11 +193,11 @@ class MaterialService
   # Atualiza o tipo específico do material
   def self.atualizar_tipo_especifico(material, parametros)
     case material.tipo
-    when 'Livro'
+    when "Livro"
       atualizar_livro(material, parametros)
-    when 'Artigo'
+    when "Artigo"
       atualizar_artigo(material, parametros)
-    when 'Video'
+    when "Video"
       atualizar_video(material, parametros)
     end
   end
@@ -209,7 +209,7 @@ class MaterialService
       update_params = {}
       update_params[:isbn] = parametros[:isbn] if parametros[:isbn].present?
       update_params[:numero_paginas] = parametros[:numero_paginas] if parametros[:numero_paginas].present?
-      
+
       livro.update!(update_params) if update_params.any?
     end
   end

@@ -8,14 +8,14 @@ module Types
     field :cidade, String, null: true
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # Campos calculados
     field :nome_completo, String, null: false
     field :idade, Integer, null: true
     field :total_materiais, Integer, null: false
-    
+
     # Lista de materiais do autor
-    field :materials, [Types::MaterialType], null: true
+    field :materials, [ Types::MaterialType ], null: true
 
     # Métodos de instância
 

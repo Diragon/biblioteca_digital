@@ -10,8 +10,8 @@ module Types
       context.schema.object_from_id(id, context)
     end
 
-    field :nodes, [Types::NodeType, null: true], null: true, description: "Fetches a list of objects given a list of IDs." do
-      argument :ids, [ID], required: true, description: "IDs of the objects."
+    field :nodes, [ Types::NodeType, null: true ], null: true, description: "Fetches a list of objects given a list of IDs." do
+      argument :ids, [ ID ], required: true, description: "IDs of the objects."
     end
 
     def nodes(ids:)
@@ -19,7 +19,7 @@ module Types
     end
 
     # Consultas para materiais
-    field :materials, [Types::MaterialType], null: true, description: "Lista todos os materiais" do
+    field :materials, [ Types::MaterialType ], null: true, description: "Lista todos os materiais" do
       argument :tipo, String, required: false, description: "Filtro por tipo de material"
       argument :status, String, required: false, description: "Filtro por status"
       argument :autor_id, ID, required: false, description: "Filtro por autor"
@@ -49,7 +49,7 @@ module Types
     end
 
     # Consultas para autores
-    field :autores, [Types::AutorType], null: true, description: "Lista todos os autores" do
+    field :autores, [ Types::AutorType ], null: true, description: "Lista todos os autores" do
       argument :tipo, String, required: false, description: "Filtro por tipo de autor"
       argument :termo_busca, String, required: false, description: "Busca por nome"
       argument :page, Integer, required: false, description: "Número da página", default_value: 1
@@ -60,7 +60,7 @@ module Types
       autores = Autor.all
       autores = autores.where(tipo: tipo) if tipo.present?
       autores = autores.where("nome ILIKE ?", "%#{termo_busca}%") if termo_busca.present?
-      
+
       offset = (page - 1) * per_page
       autores.order(:nome).limit(per_page).offset(offset)
     end
@@ -75,7 +75,7 @@ module Types
     end
 
     # Consultas para livros
-    field :livros, [Types::LivroType], null: true, description: "Lista todos os livros" do
+    field :livros, [ Types::LivroType ], null: true, description: "Lista todos os livros" do
       argument :status, String, required: false, description: "Filtro por status do material"
       argument :autor_id, ID, required: false, description: "Filtro por autor"
       argument :termo_busca, String, required: false, description: "Busca por título ou descrição"
@@ -84,20 +84,20 @@ module Types
     end
 
     def livros(status: nil, autor_id: nil, termo_busca: nil, page: 1, per_page: 10)
-      livros = Livro.joins(:material).includes(material: [:autor, :usuario])
-      
+      livros = Livro.joins(:material).includes(material: [ :autor, :usuario ])
+
       livros = livros.where(materials: { status: status }) if status.present?
       livros = livros.where(materials: { autor_id: autor_id }) if autor_id.present?
-      
+
       if termo_busca.present?
         livros = livros.where(
           "materials.titulo ILIKE ? OR materials.descricao ILIKE ?",
           "%#{termo_busca}%", "%#{termo_busca}%"
         )
       end
-      
+
       offset = (page - 1) * per_page
-      livros.order('materials.created_at DESC').limit(per_page).offset(offset)
+      livros.order("materials.created_at DESC").limit(per_page).offset(offset)
     end
 
     # Consulta para um livro específico
@@ -119,7 +119,7 @@ module Types
     end
 
     # Consultas para artigos
-    field :artigos, [Types::ArtigoType], null: true, description: "Lista todos os artigos" do
+    field :artigos, [ Types::ArtigoType ], null: true, description: "Lista todos os artigos" do
       argument :status, String, required: false, description: "Filtro por status do material"
       argument :autor_id, ID, required: false, description: "Filtro por autor"
       argument :termo_busca, String, required: false, description: "Busca por título ou descrição"
@@ -128,20 +128,20 @@ module Types
     end
 
     def artigos(status: nil, autor_id: nil, termo_busca: nil, page: 1, per_page: 10)
-      artigos = Artigo.joins(:material).includes(material: [:autor, :usuario])
-      
+      artigos = Artigo.joins(:material).includes(material: [ :autor, :usuario ])
+
       artigos = artigos.where(materials: { status: status }) if status.present?
       artigos = artigos.where(materials: { autor_id: autor_id }) if autor_id.present?
-      
+
       if termo_busca.present?
         artigos = artigos.where(
           "materials.titulo ILIKE ? OR materials.descricao ILIKE ?",
           "%#{termo_busca}%", "%#{termo_busca}%"
         )
       end
-      
+
       offset = (page - 1) * per_page
-      artigos.order('materials.created_at DESC').limit(per_page).offset(offset)
+      artigos.order("materials.created_at DESC").limit(per_page).offset(offset)
     end
 
     # Consulta para um artigo específico
@@ -163,7 +163,7 @@ module Types
     end
 
     # Consultas para vídeos
-    field :videos, [Types::VideoType], null: true, description: "Lista todos os vídeos" do
+    field :videos, [ Types::VideoType ], null: true, description: "Lista todos os vídeos" do
       argument :status, String, required: false, description: "Filtro por status do material"
       argument :autor_id, ID, required: false, description: "Filtro por autor"
       argument :termo_busca, String, required: false, description: "Busca por título ou descrição"
@@ -174,22 +174,22 @@ module Types
     end
 
     def videos(status: nil, autor_id: nil, termo_busca: nil, min_duracao: nil, max_duracao: nil, page: 1, per_page: 10)
-      videos = Video.joins(:material).includes(material: [:autor, :usuario])
-      
+      videos = Video.joins(:material).includes(material: [ :autor, :usuario ])
+
       videos = videos.where(materials: { status: status }) if status.present?
       videos = videos.where(materials: { autor_id: autor_id }) if autor_id.present?
-      
+
       if termo_busca.present?
         videos = videos.where(
           "materials.titulo ILIKE ? OR materials.descricao ILIKE ?",
           "%#{termo_busca}%", "%#{termo_busca}%"
         )
       end
-      
+
       videos = Video.por_duracao(min_minutos: min_duracao, max_minutos: max_duracao) if min_duracao.present? || max_duracao.present?
-      
+
       offset = (page - 1) * per_page
-      videos.order('materials.created_at DESC').limit(per_page).offset(offset)
+      videos.order("materials.created_at DESC").limit(per_page).offset(offset)
     end
 
     # Consulta para um vídeo específico
@@ -208,14 +208,14 @@ module Types
       {
         total_materiais: Material.count,
         por_tipo: {
-          livros: Material.por_tipo('Livro').count,
-          artigos: Material.por_tipo('Artigo').count,
-          videos: Material.por_tipo('Video').count
+          livros: Material.por_tipo("Livro").count,
+          artigos: Material.por_tipo("Artigo").count,
+          videos: Material.por_tipo("Video").count
         },
         por_status: {
-          rascunho: Material.por_status('rascunho').count,
-          publicado: Material.por_status('publicado').count,
-          arquivado: Material.por_status('arquivado').count
+          rascunho: Material.por_status("rascunho").count,
+          publicado: Material.por_status("publicado").count,
+          arquivado: Material.por_status("arquivado").count
         },
         total_autores: Autor.count,
         total_usuarios: Usuario.count

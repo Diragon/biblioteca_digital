@@ -5,12 +5,12 @@ module Types
     field :email, String, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # Contagem de materiais
     field :total_materiais, Integer, null: false
-    
+
     # Lista de materiais do usuário
-    field :materials, [Types::MaterialType], null: true
+    field :materials, [ Types::MaterialType ], null: true
 
     # Métodos de instância
 

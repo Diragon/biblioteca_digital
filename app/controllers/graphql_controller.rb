@@ -5,19 +5,19 @@ class GraphqlController < ApplicationController
   skip_before_action :autenticar_usuario!
 
   def execute
-        # Desabilita temporariamente a verificação de migrações pendentes para GraphQL
-        # ActiveRecord::Base.connection.migration_context.check_pending_migrations = false
-    
+    # Desabilita temporariamente a verificação de migrações pendentes para GraphQL
+    # ActiveRecord::Base.connection.migration_context.check_pending_migrations = false
+
     variables = prepare_variables(params[:variables])
     query = params[:query]
     operation_name = params[:operationName]
-    
+
     # Contexto com usuário atual (se autenticado)
     context = {
       current_user: usuario_atual,
       request: request
     }
-    
+
     result = BibliotecaDigitalSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue StandardError => e
@@ -51,6 +51,6 @@ class GraphqlController < ApplicationController
     logger.error e.message
     logger.error e.backtrace.join("\n")
 
-    render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
+    render json: { errors: [ { message: e.message, backtrace: e.backtrace } ], data: {} }, status: 500
   end
 end

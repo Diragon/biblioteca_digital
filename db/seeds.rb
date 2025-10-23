@@ -14,7 +14,7 @@ usuario1 = Usuario.create!(
 )
 
 usuario2 = Usuario.create!(
-  email: "editor@biblioteca.com", 
+  email: "editor@biblioteca.com",
   password: "editor123"
 )
 
@@ -36,7 +36,7 @@ autor1 = Autor.create!(
 
 autor2 = Autor.create!(
   nome: "Maria Santos",
-  tipo: "Pessoa", 
+  tipo: "Pessoa",
   data_nascimento: Date.new(1975, 8, 22)
 )
 
@@ -69,7 +69,7 @@ autor6 = Autor.create!(
 
 autor7 = Autor.create!(
   nome: "Fundação Getúlio Vargas",
-  tipo: "Instituicao", 
+  tipo: "Instituicao",
   cidade: "Rio de Janeiro"
 )
 
@@ -229,7 +229,7 @@ Video.create!(
 
 puts "✅ #{Material.count} materiais criados"
 puts "   - #{Material.por_tipo('Livro').count} livros"
-puts "   - #{Material.por_tipo('Artigo').count} artigos" 
+puts "   - #{Material.por_tipo('Artigo').count} artigos"
 puts "   - #{Material.por_tipo('Video').count} vídeos"
 
 # Estatísticas finais

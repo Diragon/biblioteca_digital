@@ -8,16 +8,16 @@ module Types
     field :status, String, null: false
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
-    
+
     # Relacionamentos
     field :autor, Types::AutorType, null: false
     field :usuario, Types::UsuarioType, null: false
-    
+
     # Campos específicos do tipo
     field :livro, Types::LivroType, null: true
     field :artigo, Types::ArtigoType, null: true
     field :video, Types::VideoType, null: true
-    
+
     # Campos calculados
     field :informacoes_especificas, GraphQL::Types::JSON, null: true
     field :pode_editar, Boolean, null: false
